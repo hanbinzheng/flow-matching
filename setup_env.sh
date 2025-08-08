@@ -45,7 +45,6 @@ CUDA_VER_DIGIT=${CUDA_RUNTIME_VER//./}  # eg. 12.4 -> 124
 
 if [[ -n "$CUDA_RUNTIME_VER" ]]; then
     echo "Detected CUDA runtime version: $CUDA_RUNTIME_VER"
-    echo "Detected CUDA version digit: $CUDA_VER_DIGIT"
     install_package "torch torchvision" "--index-url https://download.pytorch.org/whl/cu${CUDA_VER_DIGIT}"
 else
     echo "CUDA not detected or nvidia-smi not available."
