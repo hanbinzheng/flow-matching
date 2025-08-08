@@ -55,6 +55,27 @@ class TimeEmbedder(nn.Module):
         return t_embed
 
 
+class FourierEncoder(nn.Module):
+    def __init__(self, dim: int):
+        super().__init__()
+        assert (dim % 2 == 0)
+        self.half_dim = dim // 2
+        self.freqs = nn.Parameter(torch.randn(1, self.half_dim)) # (1, half_dim)
+
+    def forward(self, t: torch.Tensor) -> torch.Tensor:
+        """
+        Args:
+        - t: (bs, 1, 1, 1)
+        Returns:
+        - embeddings: (bs, dim)
+        """
+        t = t.view(-1, 1) # (bs, 1)
+        theta = t * self.freqs * 2 * math.pi  # (bs, half_dim)
+        sin_embed = torch.sin(theta)  # (bs, half_dim)
+        cos_embed = torch.cos(theta)  # (bs, half_dim)
+        return torch.cat([sin_embed, cos_embed], dim=-1) * math.sqrt(2)  # (bs, dim)
+
+
 class ResidualLayer(nn.Module):
     def __init__(self, num_channels: int, t_embed_dim: int, y_embed_dim: int):
         super().__init__()
@@ -210,7 +231,7 @@ class FMUNet(nn.Module):
             nn.BatchNorm2d(channels[1]),
             nn.SiLU()
         )
-        self.t_embedder = TimeEmbedder(t_embed_dim)
+        self.t_embedder = FourierEncoder(t_embed_dim)  # both FourierEncoder and TimeEmbedder are fine
         self.y_embedder = nn.Embedding(num_classes + 1, y_embed_dim)
 
         encoders = []

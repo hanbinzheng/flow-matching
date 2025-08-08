@@ -48,7 +48,7 @@ def test_image(
     labels = torch.arange(0, 11, device=device)
     images = flow_matching.sample(
         model = model,
-        num_timesteps = 100,
+        num_timesteps = 50,
         num_imgs = 11,
         labels = labels,
         guidance_scale = 5.0,
@@ -73,16 +73,17 @@ def train():
     """
     Basic setup for training
     """
-    total_steps = 5000
-    batch_size = 512
+    total_steps = 2500
+    batch_size = 128
+    msg_step_bs = f"batch_size: {batch_size}, total_steps: {total_steps}"
 
     # set up accelerator
     accelerator = Accelerator(
         gradient_accumulation_steps = 1,
         mixed_precision = 'fp16'
     )
-    msg_accel = f"Device: {accelerator.device}, Process: {accelerator.process_index}\n"
-    msg_accel += "Grad Accumulation Steps: 1, Grad Clip: 1.0, Mixed Precision: 'fp16'"
+    msg_accel = f"Device: {accelerator.device}, Process: {accelerator.process_index}"
+    msg_grad_prec = "Grad Accumulation Steps: 1, Grad Clip: 1.0, Mixed Precision: 'fp16'"
 
     # set up model, optimizer, scheduler and dataloader
     model = FMUNet(
@@ -103,7 +104,7 @@ def train():
     msg_sched = f"Scheduler: CosineAnneal"
     dataloader, _ = get_mnist_dataloader(
         batch_size = batch_size,
-        num_workers = 8,
+        num_workers = 4,
         train = True,
         test = False
     )
@@ -118,8 +119,8 @@ def train():
         cfg_ratio = 0.1,
         img_shape = (1, 32, 32)
     )
-
-    setup_message = f"{msg_accel}\n{msg_model}\n{msg_optim}\n{msg_sched}\n\n"
+    
+    setup_message = f"{msg_step_bs}\n\n{msg_grad_prec}\n\n{msg_model}\n\n{msg_optim}\n\n{msg_sched}\n\n{msg_grad_prec}\n"
     write_log_message(log_message=setup_message)
     print(setup_message)
 
@@ -129,7 +130,7 @@ def train():
     """
     losses = 0.0
     log_step = 100
-    test_step = 1000
+    test_step = 500
 
     with tqdm(
             range(1, total_steps + 1),

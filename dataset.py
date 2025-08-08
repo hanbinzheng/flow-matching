@@ -16,6 +16,7 @@ def get_mnist_dataloader(
     mean = (0.5, )
     std = (0.5, )
 
+    print("getting MNIST dataloader...")
     if train:
         train_transform = transforms.Compose([
             transforms.Resize((32, 32)),
@@ -61,6 +62,7 @@ def get_mnist_dataloader(
             pin_memory = pin_memory
         )
 
+    print("MNIST dataloader done...\n")
     return (train_dataloader, test_dataloader)
 
 
@@ -78,6 +80,7 @@ def get_cifar10_dataloader(
     mean = (0.5, 0.5, 0.5)
     std = (0.5, 0.5, 0.5)
 
+    print("getting CIFAR10 dataloader...")
     if train:
         train_transform = transforms.Compose([
             transforms.RandomHorizontalFlip(),
@@ -123,4 +126,5 @@ def get_cifar10_dataloader(
             pin_memory = pin_memory
         )
 
+    print("CIFAR10 dataloader done...\n")
     return (train_dataloader, test_dataloader)
