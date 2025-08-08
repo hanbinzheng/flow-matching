@@ -255,16 +255,3 @@ class FMUNet(nn.Module):
         x = self.final_conv(x)
         return x
 
-    def initialize_weights(self):
-        def init_model(model):
-            if isinstance(model, nn.Linear):
-                nn.init.kaiming_normal_(model.weight, nonlinearity='relu')
-                if model.bias is not None:
-                    nn.init.zeros_(model.bias)
-            elif isinstance(model, (nn.Conv2d, nn.ConvTranspose2d)):
-                nn.init.kaiming_normal_(model.weight, mode='fan_out', nonlinearity='relu')
-                if model.bias is not None:
-                    nn.init.zeros_(model.bias)
-            elif isinstance(model, nn.Embedding):
-                nn.init.normal_(model.weight, 0.0, 0.02)
-        self.apply(init_model)
