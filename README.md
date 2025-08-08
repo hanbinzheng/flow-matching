@@ -22,6 +22,8 @@ chmod +x setup_env.sh
 ./setup_env.sh
 ```
 
+This will take about 5 minutes. 
+
 ---
 
 ### 3. Activate the virtual environment and run training
