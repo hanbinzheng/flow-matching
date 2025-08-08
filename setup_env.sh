@@ -19,6 +19,7 @@ function install_package() {
 
 # create virtual environment
 python3 -m venv .venv >> $LOG_FILE 2>&1
+echo "create python virtual environment .venv"
 source .venv/bin/activate
 
 # upgrade pip
