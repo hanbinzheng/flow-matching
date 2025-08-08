@@ -33,13 +33,6 @@ while IFS= read -r pkg || [[ -n "$pkg" ]]; do
 done < req_no_torch.txt
 rm req_no_torch.txt
 
-# check cuda
-if ! command -v nvidia-smi &>/dev/null; then
-  echo "nvidia-smi command not found. Please install NVIDIA driver manually."
-  deactivate
-  exit 1
-fi
-
 # install pytorch according to cuda version
 CUDA_RUNTIME_VER=$(nvidia-smi | grep "CUDA Version" | sed 's/.*CUDA Version: \([0-9\.]*\).*/\1/')
 CUDA_VER_DIGIT=${CUDA_RUNTIME_VER//./}  # eg. 12.4 -> 124

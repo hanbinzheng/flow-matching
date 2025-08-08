@@ -1,4 +1,5 @@
 import time
+import os
 import torch
 import torch.nn as nn
 from tqdm import tqdm
@@ -80,10 +81,15 @@ def train():
     # set up accelerator
     accelerator = Accelerator(
         gradient_accumulation_steps = 1,
-        mixed_precision = 'fp16'
+        mixed_precision = 'fp16' if torch.cuda.is_available() else 'no'
     )
     msg_accel = f"Device: {accelerator.device}, Process: {accelerator.process_index}"
     msg_grad_prec = "Grad Accumulation Steps: 1, Grad Clip: 1.0, Mixed Precision: 'fp16'"
+    
+    # check num_cores and set num_workers
+    cpu_cores = os.cpu_count() or 1
+    num_workers = max(1, cpu_cores // 2)
+    msg_workers = f"Detected {cpu_cores} CPU cores -> using num_workers = {num_workers}"
 
     # set up model, optimizer, scheduler and dataloader
     model = FMUNet(
@@ -104,7 +110,7 @@ def train():
     msg_sched = f"Scheduler: CosineAnneal"
     dataloader, _ = get_mnist_dataloader(
         batch_size = batch_size,
-        num_workers = 4,
+        num_workers = num_workers,
         train = True,
         test = False
     )
@@ -120,7 +126,14 @@ def train():
         img_shape = (1, 32, 32)
     )
     
-    setup_message = f"{msg_step_bs}\n\n{msg_grad_prec}\n\n{msg_model}\n\n{msg_optim}\n\n{msg_sched}\n\n{msg_grad_prec}\n"
+    setup_message = (
+        f"{msg_step_bs}\n\n"
+        f"{msg_workers}\n\n"
+        f"{msg_model}\n\n"
+        f"{msg_optim}\n\n"
+        f"{msg_sched}\n\n"
+        f"{msg_grad_prec}\n"
+    )
     write_log_message(log_message=setup_message)
     print(setup_message)
 
