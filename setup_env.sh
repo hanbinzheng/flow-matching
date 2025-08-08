@@ -7,38 +7,28 @@ touch $LOG_FILE
 function install_package() {
     local pkg=$1
     local extra_args=$2
-    echo "pip install $pkg $extra_args ......"
-    if pip install $pkg $extra_args >> $LOG_FILE 2>&1; then
-        echo "pip install $pkg $extra_args done"
-    else
-        echo "error: pip install $pkg $extra_args failed, see $LOG_FILE for details"
-        deactivate
-        exit 1
-    fi
-}
-
-function install_package() {
-    local pkg=$1
-    local extra_args=$2
-    local timeout_seconds=18000 # 设置超时时间为 1800 秒（30 分钟）
+    local timeout_seconds=18000 # time_out: 1800s（30 min）
     local log_prefix="pip install $pkg $extra_args"
     echo "$log_prefix ......"
 
     (pip install $pkg $extra_args >> $LOG_FILE 2>&1) &
-    local pip_pid=$! # 获取 pip 进程的 PID
-
+    local pip_pid=$! # get PID of pip process
+    
     local elapsed_seconds=0
     while kill -0 "$pip_pid" 2>/dev/null; do
         if (( elapsed_seconds >= timeout_seconds )); then
             echo -e "\nError: $log_prefix timed out after $timeout_seconds seconds. Terminating process."
-            kill "$pip_pid" 2>/dev/null || true # 强制终止 pip 进程
+            kill "$pip_pid" 2>/dev/null || true # kill pip process
             deactivate
             exit 1
         fi
 
-        echo -n "#" # 每隔一段时间打印一个 #
+        echo -n "#" # print # at fixed interval
         sleep 1
-        ((elapsed_seconds+=10))
+        ((elapsed_seconds+=1))
+        if (( count % 70 == 0 )); then
+            printf '\n'
+        fi
     done
 
     wait "$pip_pid"
