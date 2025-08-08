@@ -26,7 +26,7 @@ function install_package() {
         echo -n "#" # print # at fixed interval
         sleep 1
         ((elapsed_seconds+=1))
-        if (( count % 70 == 0 )); then
+        if ((elapsed_seconds % 70 == 0)); then
             printf '\n'
         fi
     done
